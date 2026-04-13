@@ -22,7 +22,7 @@ module InstructionMemory_tb;
     InstructionMemory uut (.pc(pc), .instruction(instruction));
 
     initial begin
-        $dumpfile("../waves/im_tb.vcd");
+        $dumpfile("./waves/im_tb.vcd");
         $dumpvars(0, InstructionMemory_tb);
     end
 
@@ -46,6 +46,21 @@ module InstructionMemory_tb;
         //       expected[0]  = 16'bXXXXXXXXXXXXXXXX;
         //       expected[1]  = 16'bXXXXXXXXXXXXXXXX;
         //       ... (fill all 15)
+        expected[0] = `COL'b0000010000000000;
+        expected[1] = `COL'b0000010001000001;
+        expected[2] = `COL'b0010000001010000;
+        expected[3] = `COL'b0001001010000000;
+        expected[4] = `COL'b0011000001010000;
+        expected[5] = `COL'b0111000001010000;
+        expected[6] = `COL'b1000000001010000;
+        expected[7] = `COL'b1001000001010000;
+        expected[8] = `COL'b0010000000000000;
+        expected[9] = `COL'b1011000001000001;
+        expected[10] = `COL'b1100000001000000;
+        expected[11] = `COL'b1101000000000000;
+        expected[12] = `COL'b0000000000000000;
+        expected[13] = `COL'b0000000000000000;
+        expected[14] = `COL'b0000000000000000;
 
         // TODO: Walk PC through addresses 0, 2, 4, ... 28 (14 instructions).
         //       At each address, verify instruction == expected[rom_index].
@@ -62,6 +77,20 @@ module InstructionMemory_tb;
         //
         //           pc = 16'd2; #5;
         //           ... and so on.
+        begin: test_rom_contents
+            integer i;
+            for (i=0; i<15; i=i+1) begin
+                pc = {i[14:0],1'b0}; #5;
+                if (instruction!==expected[i]) begin
+                    $display("FAIL [T%0d]: PC=0 got %b exp %b",
+                        test_id, instruction, expected[i]);
+                        fail_count = fail_count+1;
+                end
+                else
+                    $display("PASS [T%0d]: PC=%d instr=%b", test_id, pc, instruction);
+                    test_id = test_id+1;
+            end
+        end
 
         $display("");
         if (fail_count == 0)

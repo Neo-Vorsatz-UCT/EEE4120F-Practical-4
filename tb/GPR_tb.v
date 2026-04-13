@@ -52,7 +52,7 @@ module GPR_tb;
     // Waveform dump
     // -------------------------------------------------------------------------
     initial begin
-        $dumpfile("../waves/gpr_tb.vcd");
+        $dumpfile("./waves/gpr_tb.vcd");
         $dumpvars(0, GPR_tb);
     end
 
@@ -124,16 +124,16 @@ module GPR_tb;
             //Get corresponding data
             integer data;
             case (i)
-                0: data = COL'hA000;
-                1: data = COL'hB001;
-                2: data = COL'hC002;
-                3: data = COL'hD003;
-                4: data = COL'hE004;
-                5: data = COL'hF005;
-                6: data = COL'h1006;
-                7: data = COL'h0007;
+                0: data = `COL'hA000;
+                1: data = `COL'hB001;
+                2: data = `COL'hC002;
+                3: data = `COL'hD003;
+                4: data = `COL'hE004;
+                5: data = `COL'hF005;
+                6: data = `COL'h1006;
+                7: data = `COL'h0007;
                 default: begin
-                    data = COL'd67; //Shouldn't need to ever run
+                    data = `COL'd67; //Shouldn't need to ever run
                     $display("INFO [T%0d]: Something went wrong while selecting a value to write.", test_id);
                 end
             endcase
