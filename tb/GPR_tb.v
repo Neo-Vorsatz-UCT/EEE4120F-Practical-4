@@ -119,7 +119,31 @@ module GPR_tb;
         //
         //       Suggested values: R0=0xA000, R1=0xB001, R2=0xC002, R3=0xD003,
         //                         R4=0xE004, R5=0xF005, R6=0x1006, R7=0x2007
-
+        reg_write_en = 1'b1; //Enable writing
+        for (i=0; i<8; i=i+1) begin: testing_each_write //For each register
+            //Get corresponding data
+            integer data;
+            case (i)
+                0: data = 16'hA000;
+                1: data = 16'hB001;
+                2: data = 16'hC002;
+                3: data = 16'hD003;
+                4: data = 16'hE004;
+                5: data = 16'hF005;
+                6: data = 16'h1006;
+                7: data = 16'h0007;
+                default: data = 16'd67; //Shouldn't need to ever run
+            endcase
+            //Write data
+            reg_write_dest = i[2:0];
+            reg_write_data = data;
+            @(posedge clk); #1;
+            //Read data
+            reg_read_addr_1 = i; #2;
+            check16(reg_read_data_1, data, test_id);
+            test_id = test_id+1;
+        end
+        reg_write_en = 1'b0; //Disable writing
 
         // ------------------------------------------------------------------
         // TEST GROUP 2: Write with reg_write_en = 0 must NOT change register
@@ -137,8 +161,16 @@ module GPR_tb;
         //           reg_read_addr_1 = 3'd0; #2;
         //           check16(reg_read_data_1, 16'hA000, test_id);  // original value
         //           test_id = test_id + 1;
-
-
+        reg_write_en = 1'b0;
+        //Attempt to write
+        reg_write_dest = 3'd0;
+        reg_write_data = 16'hDEAD; //Funny constant
+        @(posedge clk); #1;
+        //Check if not written
+        reg_read_addr_1 = 3'd0; #2;
+        check16(reg_read_data_1, 16'hA000, test_id); //Test for original value
+        test_id = test_id+1;
+        
         // ------------------------------------------------------------------
         // TEST GROUP 3: Simultaneous read from two different registers
         // ------------------------------------------------------------------
@@ -152,7 +184,13 @@ module GPR_tb;
         //           #2;
         //           check16(reg_read_data_1, 16'hB001, test_id); test_id=test_id+1;
         //           check16(reg_read_data_2, 16'hD003, test_id); test_id=test_id+1;
-
+        reg_read_addr_1 = 3'd1;
+        reg_read_addr_2 = 3'd3;
+        #2;
+        check16(reg_read_data_1, 16'hB001, test_id);
+        test_id = test_id+1;
+        check16(reg_read_data_2, 16'hD003, test_id);
+        test_id = test_id+1;
 
         // ------------------------------------------------------------------
         // TEST GROUP 4: Read during write (write-before-read behaviour)
@@ -177,7 +215,19 @@ module GPR_tb;
         //           #2;
         //           check16(reg_read_data_1, 16'hNEW_VALUE, test_id); // after write
         //           test_id = test_id + 1;
-
+        reg_write_en = 1'b1;
+        reg_write_dest = 3'd2;
+        reg_write_data = 16'hFEED;
+        reg_read_addr_1 = 3'd2; //Same as write destination
+        #2;
+        $display("INFO [T%0d]: Read during write = 0x%h (document this)",
+            test_id, reg_read_data_1); //Display value before clock positive edge
+        test_id = test_id+1;
+        @(posedge clk); #1;
+        reg_write_en = 1'b0;
+        #2;
+        check16(reg_read_data_1, 16'hFEED, test_id); //Check value after clock positive edge
+        test_id = test_id+1;
 
         // ------------------------------------------------------------------
         // Summary

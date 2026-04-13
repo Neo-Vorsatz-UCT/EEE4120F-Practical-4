@@ -2,11 +2,11 @@
 // Practical 4: StarCore-1 — Single-Cycle Processor in Verilog
 // =========================================================================
 //
-// GROUP NUMBER:
+// GROUP NUMBER: 8
 //
 // MEMBERS:
-//   - Member 1 Name, Student Number
-//   - Member 2 Name, Student Number
+//   - Member 1 Shaun Beautement, BTMSHA001
+//   - Member 2 Neo Vorsatz, VRSNEO001
 
 // File        : GPR.v
 // Description : General Purpose Register File.
@@ -43,7 +43,7 @@ module GPR (
     //
     //       reg [15:0] reg_array [7:0];
     // -------------------------------------------------------------------------
-
+    reg[15:0] reg_array[7:0];
 
     // -------------------------------------------------------------------------
     // TODO: Initialise all registers to zero at simulation start.
@@ -55,7 +55,11 @@ module GPR (
     //               reg_array[i] <= 16'd0;
     //       end
     // -------------------------------------------------------------------------
-
+    integer i;
+    initial begin
+        for (i=0; i<8; i=i+1)
+            reg_array[i] <= 16'd0;
+    end
 
     // -------------------------------------------------------------------------
     // TODO: Implement the synchronous write port.
@@ -70,7 +74,10 @@ module GPR (
     //       IMPORTANT: Use non-blocking assignment (<=) here.
     //                  This models a real flip-flop-based register.
     // -------------------------------------------------------------------------
-
+    always @(posedge clk) begin
+        if (reg_write_en)
+            reg_array[reg_write_dest] <= reg_write_data;
+    end
 
     // -------------------------------------------------------------------------
     // TODO: Implement the two asynchronous read ports.
@@ -85,6 +92,7 @@ module GPR (
     //       the read port returns the OLD value (before the write commits).
     //       Document this write-before-read behaviour in your report.
     // -------------------------------------------------------------------------
-
+    assign reg_read_data_1 = reg_array[reg_read_addr_1];
+    assign reg_read_data_2 = reg_array[reg_read_addr_2];
 
 endmodule
