@@ -43,7 +43,7 @@ module GPR (
     //
     //       reg [15:0] reg_array [7:0];
     // -------------------------------------------------------------------------
-    reg[15:0] reg_array[7:0];
+    reg[COL-1:0] reg_array[7:0];
 
     // -------------------------------------------------------------------------
     // TODO: Initialise all registers to zero at simulation start.
@@ -58,7 +58,7 @@ module GPR (
     integer i;
     initial begin
         for (i=0; i<8; i=i+1)
-            reg_array[i] <= 16'd0;
+            reg_array[i] <= COL'd0;
     end
 
     // -------------------------------------------------------------------------

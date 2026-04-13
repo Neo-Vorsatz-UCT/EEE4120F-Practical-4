@@ -124,15 +124,18 @@ module GPR_tb;
             //Get corresponding data
             integer data;
             case (i)
-                0: data = 16'hA000;
-                1: data = 16'hB001;
-                2: data = 16'hC002;
-                3: data = 16'hD003;
-                4: data = 16'hE004;
-                5: data = 16'hF005;
-                6: data = 16'h1006;
-                7: data = 16'h0007;
-                default: data = 16'd67; //Shouldn't need to ever run
+                0: data = COL'hA000;
+                1: data = COL'hB001;
+                2: data = COL'hC002;
+                3: data = COL'hD003;
+                4: data = COL'hE004;
+                5: data = COL'hF005;
+                6: data = COL'h1006;
+                7: data = COL'h0007;
+                default: begin
+                    data = COL'd67; //Shouldn't need to ever run
+                    $display("INFO [T%0d]: Something went wrong while selecting a value to write.", test_id);
+                end
             endcase
             //Write data
             reg_write_dest = i[2:0];
