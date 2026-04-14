@@ -27,7 +27,7 @@ module ALU_Control_tb;
     );
 
     initial begin
-        $dumpfile("../waves/ac_tb.vcd");
+        $dumpfile("./waves/ac_tb.vcd");
         $dumpvars(0, ALU_Control_tb);
     end
 
@@ -65,7 +65,16 @@ module ALU_Control_tb;
         //
         //       ALUOp=2'b10; Opcode=4'hF; #10;
         //       check_cnt(ALU_Cnt, 3'b000, test_id); test_id=test_id+1;
+        begin: testing_opcodes_for_add
+            integer i;
 
+            ALUOp = 2'b10; //Set the ALU operation
+            for (i=0; i<16; i++) begin
+                Opcode = i[3:0]; #10;
+                check_cnt(ALU_Cnt, 3'b000, test_id);
+                test_id = test_id+1;
+            end
+        end
 
         // ------------------------------------------------------------------
         // ALUOp = 01 (branch) — always SUB regardless of opcode
@@ -74,7 +83,16 @@ module ALU_Control_tb;
 
         // TODO: Apply ALUOp=2'b01 with several opcode values and verify
         //       ALU_Cnt is always 3'b001 (SUB).
+        begin: testing_opcodes_for_sub
+            integer i;
 
+            ALUOp = 2'b01; //Set the ALU operation
+            for (i=0; i<16; i++) begin
+                Opcode = i[3:0]; #10;
+                check_cnt(ALU_Cnt, 3'b001, test_id);
+                test_id = test_id+1;
+            end
+        end
 
         // ------------------------------------------------------------------
         // ALUOp = 00 (R-type) — decode from opcode
@@ -95,7 +113,18 @@ module ALU_Control_tb;
         //       ALUOp=2'b00; Opcode=4'h2; #10;
         //       check_cnt(ALU_Cnt, 3'b000, test_id); test_id=test_id+1;
         //       ... etc.
+        begin: testing_opcodes
+            integer i;
+            reg[2:0] expected;
 
+            ALUOp = 2'b00; //Set the ALU operation
+            for (i=2; i<10; i++) begin
+                Opcode = i[3:0]; #10;
+                expected = (i-2);
+                check_cnt(ALU_Cnt, expected, test_id);
+                test_id = test_id+1;
+            end
+        end
 
         // ------------------------------------------------------------------
         // Default case
@@ -104,7 +133,10 @@ module ALU_Control_tb;
 
         // TODO: Apply ALUOp=2'b00 with an undefined opcode (e.g. 4'hA or 4'hF)
         //       and verify ALU_Cnt defaults to 3'b000.
-
+        ALUOp = 2'b00;
+        Opcode = 4'hA; #10;
+        check_cnt(ALU_Cnt, 3'b000, test_id);
+        test_id = test_id+1;
 
         $display("");
         if (fail_count == 0)

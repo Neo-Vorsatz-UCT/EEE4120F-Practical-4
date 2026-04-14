@@ -5,8 +5,8 @@
 // GROUP NUMBER:
 //
 // MEMBERS:
-//   - Member 1 Name, Student Number
-//   - Member 2 Name, Student Number
+//   - Member 1 Shaun Beautement, BTMSHA001
+//   - Member 2 Neo Vorsatz, VRSNEO001
 
 // File        : ALU_Control.v
 // Description : ALU Control Unit.
@@ -66,6 +66,24 @@ module ALU_Control (
     //       (0, 1, X, or Z). This correctly encodes don't-care bits for the
     //       opcode field when ALUOp selects memory or branch mode.
     // -------------------------------------------------------------------------
-
+    //Get 6-bit input
+    wire[5:0] control_in;
+    assign control_in = {ALUOp, Opcode};
+    //Determine output
+    always @(*) begin
+        casex (control_in)
+            6'b10xxxx: ALU_Cnt = 3'b000; //ADD, for LD/ST
+            6'b01xxxx: ALU_Cnt = 3'b001; //SUB, for BEQ/BNE
+            6'b000010: ALU_Cnt = 3'b000; //ADD
+            6'b000011: ALU_Cnt = 3'b001; //SUB
+            6'b000100: ALU_Cnt = 3'b010; //INV (NOT)
+            6'b000101: ALU_Cnt = 3'b011; //SHL
+            6'b000110: ALU_Cnt = 3'b100; //SHR
+            6'b000111: ALU_Cnt = 3'b101; //AND
+            6'b001000: ALU_Cnt = 3'b110; //OR
+            6'b001001: ALU_Cnt = 3'b111; //SLT
+            default: ALU_Cnt = 3'b000; //ADD, for reserved/undefined
+        endcase
+    end
 
 endmodule
