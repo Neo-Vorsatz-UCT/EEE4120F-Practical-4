@@ -2,11 +2,11 @@
 // Practical 4: StarCore-1 — Single-Cycle Processor in Verilog
 // =========================================================================
 //
-// GROUP NUMBER:
+// GROUP NUMBER: 8
 //
 // MEMBERS:
-//   - Member 1 Name, Student Number
-//   - Member 2 Name, Student Number
+//   - Member 1 Shaun Beautement, BTMSHA001
+//   - Member 2 Neo Vorsatz, VRSNEO001
 
 // File        : ALU.v
 // Description : 16-bit Arithmetic and Logic Unit (ALU).
@@ -29,21 +29,16 @@ module ALU (
 );
 
     // -------------------------------------------------------------------------
-    // TODO: Implement the zero flag using a continuous assignment.
-    //       The zero output must be a wire driven by a single assign statement.
-    //       It should be 1 when result equals 16'd0, and 0 otherwise.
-    //
-    //       assign zero = ...;
+    // Implement the zero flag using a continuous assignment.
+    //   The zero output must be a wire driven by a single assign statement.
+    //   It should be 1 when result equals 16'd0, and 0 otherwise.
     // -------------------------------------------------------------------------
 
+    // The boolean result of the comparison is 1 when result is zero and 0 otherwise as required.
+    assign zero = (result == 16'd0);
+
     // -------------------------------------------------------------------------
-    // TODO: Implement the ALU operations using a combinational always block.
-    //
-    //       Use: always @(*) begin
-    //                case (alu_control)
-    //                    ...
-    //                endcase
-    //            end
+    // Implement the ALU operations using a combinational always block.
     //
     //       ALUcnt | Operation | Expression
     //       -------+-----------+------------------------------
@@ -57,10 +52,21 @@ module ALU (
     //       3'b111 | SLT       | result = (a < b) ? 16'd1 : 16'd0  (unsigned)
     //       default| ADD       | result = a + b   (safe fallback)
     //
-    //       Hint: The SLT comparison uses unsigned arithmetic because Verilog
-    //       treats reg/wire values as unsigned by default. This is correct
-    //       for the StarCore ISA.
     // -------------------------------------------------------------------------
-
+    always @(*) begin
+        case (alu_control)
+            3'b000: result = a + b;                     // ADD
+            3'b001: result = a - b;                     // SUB
+            3'b010: result = ~a;                        // INV
+            3'b011: result = a << b[3:0];               // SHL
+            3'b100: result = a >> b[3:0];               // SHR
+            3'b101: result = a & b;                     // AND
+            3'b110: result = a | b;                     // OR
+            3'b111: result = (a < b) ? 16'd1 : 16'd0;   // SLT
+            // The SLT comparison uses unsigned arithmetic because Verilog
+            // treats reg/wire values as unsigned by default.
+            // This is correct for the StarCore ISA.
+        endcase
+    end
 
 endmodule

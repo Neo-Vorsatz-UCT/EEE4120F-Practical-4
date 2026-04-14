@@ -99,63 +99,291 @@ module ALU_tb;
         $display("=== ALU Testbench ===");
         $display("--- ADD (alu_control = 3'b000) ---");
 
-        // TODO: Test ADD — apply at least three different input pairs.
-        //       Format: a = X; b = Y; alu_control = 3'b000; #10;
-        //               check_result(result, X+Y, test_id); test_id = test_id + 1;
-        //
-        //       Suggested pairs: (10,5), (0xFFFF, 1) [overflow], (0, 0)
+        // Test ADD
+        begin: add_tests
+            localparam N = 11;
+
+            integer i, va[0:N-1], vb[0:N-1], vresult[0:N-1], vzero[0:N-1]; i=0;
+            // Positive numbers, positive result.
+            va[i]=10;     vb[i]=5;       vresult[i]=15; vzero[i]=0; i=i+1;
+            // Positive numbers, reversed.
+            va[i]=5;      vb[i]=10;      vresult[i]=15; vzero[i]=0; i=i+1;
+
+            // Small negative numbers, negative result.
+            va[i]=-10;    vb[i]=-5;     vresult[i]=-15; vzero[i]=0; i=i+1;
+            // Small negative numbers, reversed.
+            va[i]=-5;     vb[i]=-10;    vresult[i]=-15; vzero[i]=0; i=i+1;
+
+            // Positive an negative number, positive result.
+            va[i]=0124;    vb[i]=-0123;  vresult[i]=1;  vzero[i]=0; i=i+1;
+            // Positive an negative number, negative result.
+            va[i]=0123;    vb[i]=-0124;  vresult[i]=-1; vzero[i]=0; i=i+1;
+            // Positive an negative number, zero result.
+            va[i]=0123;    vb[i]=-0123;  vresult[i]=0;  vzero[i]=1; i=i+1;
+
+            // Overflow conditions.
+            va[i]='ha000;  vb[i]='h6000+1; vresult[i]=1;      vzero[i]=0; i=i+1;
+            va[i]='hffff;  vb[i]='hffff;   vresult[i]='hfffe; vzero[i]=0; i=i+1;
+            va[i]='hffff;  vb[i]=1;        vresult[i]=0;      vzero[i]=1; i=i+1;
+
+            // Zeros.
+            va[i]='h0000; vb[i]='h0000; vresult[i]=0;   vzero[i]=1; i=i+1;
+
+            alu_control = 3'b000;
+            for (i = 0; i < N; i = i + 1) begin
+                // Set inputs and wait for combinational logic to settle.
+                a = va[i]; b = vb[i]; #10
+                // Check outputs
+                check_result(result, vresult[i], test_id); test_id = test_id + 1;
+                check_zero(zero, vzero[i],       test_id); test_id = test_id + 1;
+            end
+        end
 
 
         $display("--- SUB (alu_control = 3'b001) ---");
 
-        // TODO: Test SUB with at least three pairs.
-        //       Include a case where result = 0 to test the zero flag.
-        //       Suggested pairs: (10, 5), (7, 7) [result=0], (5, 10) [underflow wrap]
+        // Test SUB
+        begin: sub_tests
+            localparam N = 13;
+
+            integer i, va[0:N-1], vb[0:N-1], vresult[0:N-1], vzero[0:N-1]; i=0;
+            // Small positive numbers, positive result.
+            va[i]=10;     vb[i]=5;     vresult[i]=5;    vzero[i]=0; i=i+1;
+            // Large positive values, positive result.
+            va[i]=40000;  vb[i]=39567; vresult[i]=433;  vzero[i]=0; i=i+1;
+            // Small positive numbers, negative result.
+            va[i]=5;      vb[i]=10;    vresult[i]=-5;   vzero[i]=0; i=i+1;
+            // Large positive numbers, negative result.
+            va[i]=39567;  vb[i]=40000; vresult[i]=-433; vzero[i]=0; i=i+1;
+
+            // Small negative numbers, negative result.
+            va[i]=-10;     vb[i]=-5;     vresult[i]=-5;   vzero[i]=0; i=i+1;
+            // Large negative values, negative result.
+            va[i]=-20000;  vb[i]=-19567; vresult[i]=-433; vzero[i]=0; i=i+1;
+            // Small negative numbers, positive result.
+            va[i]=-5;      vb[i]=-10;    vresult[i]=5;    vzero[i]=0; i=i+1;
+            // Large negative numbers, positive result.
+            va[i]=-19567;  vb[i]=-20000; vresult[i]=433;  vzero[i]=0; i=i+1;
+
+            // Positive an negative number, positive result.
+            va[i]=0123;    vb[i]=-0123;  vresult[i]=0246; vzero[i]=0; i=i+1;
+
+            // Overflow
+            va[i]='ha000;  vb[i]=-('h6000+1); vresult[i]=1; vzero[i]=0; i=i+1;
+
+            // Cancellation of identical inputs.
+            va[i]='h0000; vb[i]='h0000; vresult[i]=0;   vzero[i]=1; i=i+1;
+            va[i]='h1234; vb[i]='h1234; vresult[i]=0;   vzero[i]=1; i=i+1;
+            va[i]='hffff; vb[i]='hffff; vresult[i]=0;   vzero[i]=1; i=i+1;
+
+            alu_control = 3'b001;
+            for (i = 0; i < N; i = i + 1) begin
+                // Set inputs and wait for combinational logic to settle.
+                a = va[i]; b = vb[i]; #10
+                // Check outputs
+                check_result(result, vresult[i], test_id); test_id = test_id + 1;
+                check_zero(zero, vzero[i],       test_id); test_id = test_id + 1;
+            end
+        end
 
 
-        $display("--- INV / NOT (alu_control = 3'b010) ---");
+        $display("--- INV (alu_control = 3'b010) ---");
 
-        // TODO: Test INV (bitwise NOT, b is ignored) with at least two values.
-        //       Suggested values for a: 16'h0000, 16'hFFFF, 16'hA5A5
+        // Test INV (bitwise NOT, b must be ignored)
+        begin: inv_tests
+            localparam N = 5;
+
+            integer i, va[0:N-1], vb[0:N-1], vresult[0:N-1], vzero[0:N-1]; i=0;
+            // All zeros, and check that b is ignored.
+            va[i]='h0000; vb[i]='h0000; vresult[i]='hffff; vzero[i]=0; i=i+1;
+            va[i]='h0000; vb[i]='hb3b3; vresult[i]='hffff; vzero[i]=0; i=i+1;
+            // All ones. And check that b is ignored.
+            va[i]='hffff; vb[i]='h0000; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]='hffff; vb[i]='hb3b3; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            // Some on, some off.
+            va[i]='h37ae; vb[i]='hffff; vresult[i]='hc851; vzero[i]=0; i=i+1;
+
+            alu_control = 3'b010;
+            for (i = 0; i < N; i = i + 1) begin
+                // Set inputs and wait for combinational logic to settle.
+                a = va[i]; b = vb[i]; #10
+                // Check outputs
+                check_result(result, vresult[i], test_id); test_id = test_id + 1;
+                check_zero(zero, vzero[i],       test_id); test_id = test_id + 1;
+            end
+        end
 
 
         $display("--- SHL (alu_control = 3'b011) ---");
 
-        // TODO: Test left shift. Remember only b[3:0] is used as the shift amount.
-        //       Suggested pairs (a, b): (16'h0001, 4), (16'h0003, 2), (16'hFFFF, 8)
+        // Test left shift. Remember only b[3:0] is used as the shift amount.
+        begin: shl_tests
+            localparam N = 16;
+
+            integer i, va[0:N-1], vb[0:N-1], vresult[0:N-1], vzero[0:N-1]; i=0;
+            // Test zero with various shifts.
+            va[i]='h0000; vb[i]='h0000; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]='h0000; vb[i]='h0001; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]='h0000; vb[i]='h0003; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]='h0000; vb[i]='hffff; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            // Test 1 with various shifts.
+            va[i]='h0001; vb[i]='h0000; vresult[i]='h0001; vzero[i]=0; i=i+1;
+            va[i]='h0001; vb[i]='h0001; vresult[i]='h0002; vzero[i]=0; i=i+1;
+            va[i]='h0001; vb[i]='h0003; vresult[i]='h0008; vzero[i]=0; i=i+1;
+            va[i]='h0001; vb[i]='hffff; vresult[i]='h8000; vzero[i]=0; i=i+1;
+            // Test last bit with various shifts.
+            va[i]='h8000; vb[i]='h0000; vresult[i]='h8000; vzero[i]=0; i=i+1;
+            va[i]='h8000; vb[i]='h0001; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]='h8000; vb[i]='hffff; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]='h8000; vb[i]='h0010; vresult[i]='h8000; vzero[i]=0; i=i+1;
+            // Test 0xFFFF with various shifts.
+            va[i]='hffff; vb[i]='h0000; vresult[i]='hffff; vzero[i]=0; i=i+1;
+            va[i]='hffff; vb[i]='h0001; vresult[i]='hfffe; vzero[i]=0; i=i+1;
+            va[i]='hffff; vb[i]='h0003; vresult[i]='hfff8; vzero[i]=0; i=i+1;
+            va[i]='hffff; vb[i]='hffff; vresult[i]='h8000; vzero[i]=0; i=i+1;
+
+            alu_control = 3'b011;
+            for (i = 0; i < N; i = i + 1) begin
+                // Set inputs and wait for combinational logic to settle.
+                a = va[i]; b = vb[i]; #10
+                // Check outputs
+                check_result(result, vresult[i], test_id); test_id = test_id + 1;
+                check_zero(zero, vzero[i],       test_id); test_id = test_id + 1;
+            end
+        end
 
 
         $display("--- SHR (alu_control = 3'b100) ---");
 
-        // TODO: Test right shift (logical — MSB fills with 0).
-        //       Suggested pairs: (16'h0080, 4), (16'hFFFF, 8), (16'h0001, 1)
+        // Test right shift. (logical — MSB fills with 0).
+        begin: shr_tests
+            localparam N = 16;
 
+            integer i, va[0:N-1], vb[0:N-1], vresult[0:N-1], vzero[0:N-1]; i=0;
+            // Test zero with various shifts.
+            va[i]='h0000; vb[i]='h0000; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]='h0000; vb[i]='h0001; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]='h0000; vb[i]='h0003; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]='h0000; vb[i]='hffff; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            // Test final bit with various shifts.
+            va[i]='h8000; vb[i]='h0000; vresult[i]='h8000; vzero[i]=0; i=i+1;
+            va[i]='h8000; vb[i]='h0001; vresult[i]='h4000; vzero[i]=0; i=i+1;
+            va[i]='h8000; vb[i]='h0003; vresult[i]='h1000; vzero[i]=0; i=i+1;
+            va[i]='h8000; vb[i]='hffff; vresult[i]='h0001; vzero[i]=0; i=i+1;
+            // Test first bit with various shifts.
+            va[i]='h0001; vb[i]='h0000; vresult[i]='h0001; vzero[i]=0; i=i+1;
+            va[i]='h0001; vb[i]='h0001; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]='h0001; vb[i]='hffff; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]='h0001; vb[i]='h0010; vresult[i]='h0001; vzero[i]=0; i=i+1;
+            // Test 0xFFFF with various shifts.
+            va[i]='hffff; vb[i]='h0000; vresult[i]='hffff; vzero[i]=0; i=i+1;
+            va[i]='hffff; vb[i]='h0001; vresult[i]='h7fff; vzero[i]=0; i=i+1;
+            va[i]='hffff; vb[i]='h0003; vresult[i]='h1fff; vzero[i]=0; i=i+1;
+            va[i]='hffff; vb[i]='hffff; vresult[i]='h0001; vzero[i]=0; i=i+1;
+
+            alu_control = 3'b100;
+            for (i = 0; i < N; i = i + 1) begin
+                // Set inputs and wait for combinational logic to settle.
+                a = va[i]; b = vb[i]; #10
+                // Check outputs
+                check_result(result, vresult[i], test_id); test_id = test_id + 1;
+                check_zero(zero, vzero[i],       test_id); test_id = test_id + 1;
+            end
+        end
 
         $display("--- AND (alu_control = 3'b101) ---");
 
-        // TODO: Test bitwise AND.
-        //       Suggested pairs: (16'hFFFF, 16'h0F0F), (16'hAAAA, 16'h5555), (0, anything)
+        // Test bitwise AND.
+        begin: and_tests
+            localparam N = 6;
 
+            integer i, va[0:N-1], vb[0:N-1], vresult[0:N-1], vzero[0:N-1]; i=0;
+            // Test and with zero.
+            va[i]='h0000; vb[i]='h1234; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]='habcd; vb[i]='h0000; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            // Test and with ffff.
+            va[i]='h2468; vb[i]='hffff; vresult[i]='h2468; vzero[i]=0; i=i+1;
+            va[i]='hffff; vb[i]='h9bdf; vresult[i]='h9bdf; vzero[i]=0; i=i+1;
+            // Test with a mixture of set bits.
+            va[i]='h1234; vb[i]='h0f0f; vresult[i]='h0204; vzero[i]=0; i=i+1;
+            // Test with mutually exclusive bits.
+            va[i]='h55cc; vb[i]='haa33; vresult[i]='h0000; vzero[i]=1; i=i+1;
+
+            alu_control = 3'b101;
+            for (i = 0; i < N; i = i + 1) begin
+                // Set inputs and wait for combinational logic to settle.
+                a = va[i]; b = vb[i]; #10
+                // Check outputs
+                check_result(result, vresult[i], test_id); test_id = test_id + 1;
+                check_zero(zero, vzero[i],       test_id); test_id = test_id + 1;
+            end
+        end
 
         $display("--- OR (alu_control = 3'b110) ---");
 
-        // TODO: Test bitwise OR.
-        //       Suggested pairs: (16'h0F0F, 16'hF0F0), (16'hAAAA, 16'h5555), (0, 16'hBEEF)
+        // Test bitwise OR.
+        begin: or_tests
+            localparam N = 6;
+
+            integer i, va[0:N-1], vb[0:N-1], vresult[0:N-1], vzero[0:N-1]; i=0;
+            // Test or with zero.
+            va[i]='h0000; vb[i]='h1234; vresult[i]='h1234; vzero[i]=0; i=i+1;
+            va[i]='habcd; vb[i]='h0000; vresult[i]='habcd; vzero[i]=0; i=i+1;
+            // Test or with ffff.
+            va[i]='h2468; vb[i]='hffff; vresult[i]='hffff; vzero[i]=0; i=i+1;
+            va[i]='hffff; vb[i]='h9bdf; vresult[i]='hffff; vzero[i]=0; i=i+1;
+            // Test with a mixture of set bits.
+            va[i]='h1234; vb[i]='h0f0f; vresult[i]='h1f3f; vzero[i]=0; i=i+1;
+            // Test with mutually exclusive bits.
+            va[i]='h55cc; vb[i]='haa33; vresult[i]='hffff; vzero[i]=0; i=i+1;
+
+            alu_control = 3'b110;
+            for (i = 0; i < N; i = i + 1) begin
+                // Set inputs and wait for combinational logic to settle.
+                a = va[i]; b = vb[i]; #10
+                // Check outputs
+                check_result(result, vresult[i], test_id); test_id = test_id + 1;
+                check_zero(zero, vzero[i],       test_id); test_id = test_id + 1;
+            end
+        end
 
 
         $display("--- SLT (alu_control = 3'b111) ---");
 
-        // TODO: Test set-less-than. Result must be 1 when a < b (unsigned), 0 otherwise.
-        //       Test cases must include: a < b, a == b, a > b.
-        //       Suggested pairs: (5, 10) -> 1,  (10, 10) -> 0,  (15, 3) -> 0
+        // Test set-less-than. Result must be 1 when a < b (unsigned), 0 otherwise.
+        begin: sltu_tests
+            localparam N = 10;
 
+            integer i, va[0:N-1], vb[0:N-1], vresult[0:N-1], vzero[0:N-1]; i=0;
+            // Test equal values (false cases).
+            va[i]='h0000; vb[i]='h0000; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]='h1234; vb[i]='h1234; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]='hffff; vb[i]='hffff; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            // Test a < b (true cases).
+            va[i]='h0000; vb[i]='h0001; vresult[i]='h0001; vzero[i]=0; i=i+1;
+            va[i]='h1234; vb[i]='h5678; vresult[i]='h0001; vzero[i]=0; i=i+1;
+            va[i]='h7fff; vb[i]='h8000; vresult[i]='h0001; vzero[i]=0; i=i+1;
+            va[i]='h0000; vb[i]='hffff; vresult[i]='h0001; vzero[i]=0; i=i+1;
+            // Test a > b (false cases).
+            va[i]='h0001; vb[i]='h0000; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]='h5678; vb[i]='h1234; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]='hffff; vb[i]='h0000; vresult[i]='h0000; vzero[i]=1; i=i+1;
 
-        $display("--- Zero flag edge cases ---");
+            alu_control = 3'b111;
+            for (i = 0; i < N; i = i + 1) begin
+                // Set inputs and wait for combinational logic to settle.
+                a = va[i]; b = vb[i]; #10
+                // Check outputs
+                check_result(result, vresult[i], test_id); test_id = test_id + 1;
+                check_zero(zero, vzero[i],       test_id); test_id = test_id + 1;
+            end
+        end
 
-        // TODO: Verify the zero flag is asserted for SUB where a == b.
-        //       Verify the zero flag is de-asserted for all non-zero results.
-        //       Verify the zero flag for INV of 16'hFFFF (result should be 0).
-
+        // $display("--- Zero flag edge cases ---");
+        // Note: all zero-flag edge cases are tested above as required, including but not limited to:
+        //   Verify the zero flag is asserted for SUB where a == b.
+        //   Verify the zero flag is de-asserted for all non-zero results.
+        //   Verify the zero flag for INV of 16'hFFFF (result should be 0).
 
         // -----------------------------------------------------------------------
         // Summary
