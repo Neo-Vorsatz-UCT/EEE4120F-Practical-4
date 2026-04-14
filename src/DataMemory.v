@@ -2,11 +2,11 @@
 // Practical 4: StarCore-1 — Single-Cycle Processor in Verilog
 // =========================================================================
 //
-// GROUP NUMBER:
+// GROUP NUMBER: 8
 //
 // MEMBERS:
-//   - Member 1 Name, Student Number
-//   - Member 2 Name, Student Number
+//   - Member 1 Shaun Beautement, BTMASHA001
+//   - Member 2 Neo Vorsatz, VRSNEO001
 
 // File        : DataMemory.v
 // Description : Data Memory (RAM).
@@ -42,7 +42,7 @@ module DataMemory (
     //
     //       reg [`COL-1:0] memory [`ROW_D-1:0];
     // -------------------------------------------------------------------------
-
+    reg[`COL-1:0] memory[`ROW_D-1:0];
 
     // -------------------------------------------------------------------------
     // TODO: Derive the word address from mem_access_addr.
@@ -55,7 +55,7 @@ module DataMemory (
     //       (In a full system the byte offset within a word would also be
     //       handled, but StarCore-1 only supports 16-bit aligned accesses.)
     // -------------------------------------------------------------------------
-
+    wire[2:0] ram_addr = mem_access_addr[3:1];
 
     // -------------------------------------------------------------------------
     // TODO: Load the data memory from file at simulation start.
@@ -78,7 +78,10 @@ module DataMemory (
     //           $fclose(log_fd);
     //       end
     // -------------------------------------------------------------------------
-
+    integer log_fd;
+    initial begin
+        $readmemb("./test/test.data", memory);
+    end
 
     // -------------------------------------------------------------------------
     // TODO: Implement the synchronous write port.
@@ -92,7 +95,10 @@ module DataMemory (
     //
     //       IMPORTANT: Use non-blocking assignment (<=).
     // -------------------------------------------------------------------------
-
+    always @(posedge clk) begin
+    if (mem_write_en)
+        memory[ram_addr] <= mem_write_data;
+    end
 
     // -------------------------------------------------------------------------
     // TODO: Implement the combinational (gated) read port.
@@ -102,6 +108,6 @@ module DataMemory (
     //
     //       assign mem_read_data = mem_read ? memory[ram_addr] : 16'd0;
     // -------------------------------------------------------------------------
-
+    assign mem_read_data = mem_read ? memory[ram_addr] : 16'd0;
 
 endmodule

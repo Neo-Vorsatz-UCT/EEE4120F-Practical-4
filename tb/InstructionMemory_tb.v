@@ -84,11 +84,11 @@ module InstructionMemory_tb;
                 if (instruction!==expected[i]) begin
                     $display("FAIL [T%0d]: PC=0 got %b exp %b",
                         test_id, instruction, expected[i]);
-                        fail_count = fail_count+1;
+                    fail_count = fail_count+1;
                 end
                 else
                     $display("PASS [T%0d]: PC=%d instr=%b", test_id, pc, instruction);
-                    test_id = test_id+1;
+                test_id = test_id+1;
             end
         end
 

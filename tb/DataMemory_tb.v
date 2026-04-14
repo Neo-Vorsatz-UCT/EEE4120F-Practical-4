@@ -36,7 +36,7 @@ module DataMemory_tb;
     always  #5 clk = ~clk;
 
     initial begin
-        $dumpfile("../waves/dm_tb.vcd");
+        $dumpfile("./waves/dm_tb.vcd");
         $dumpvars(0, DataMemory_tb);
     end
 
@@ -72,7 +72,33 @@ module DataMemory_tb;
         //       else
         //           $display("PASS [T%0d]", test_id);
         //       test_id = test_id + 1;
+        begin: test_ram_contents
+            integer i;
 
+            //generate expected values
+            reg[`COL-1:0] expected[`ROW_D-1:0];
+            expected[0] = `COL'b0000000000000001;
+            expected[1] = `COL'b0000000000000010;
+            expected[2] = `COL'b0000000000000011;
+            expected[3] = `COL'b0000000000000100;
+            expected[4] = `COL'b0000000000000101;
+            expected[5] = `COL'b0000000000000110;
+            expected[6] = `COL'b0000000000000111;
+            expected[7] = `COL'b0000000000001000;
+
+            //compare each value
+            mem_read = 1'b1;
+            for (i=0; i<8; i=i+1) begin
+                mem_access_addr = {i[`COL-2:0],1'b0}; #5;
+                if (mem_read_data!==expected[i]) begin
+                    $display("FAIL [T%0d]: addr=0 got=0x%h exp=0x%h", test_id, mem_read_data, expected[i]);
+                    fail_count = fail_count+1;
+                end
+                else
+                    $display("PASS [T%0d]", test_id);
+                test_id = test_id+1;
+            end
+        end
 
         // ------------------------------------------------------------------
         // TEST GROUP 2: Write new values to all 8 locations, then read back
@@ -94,7 +120,43 @@ module DataMemory_tb;
         //       mem_access_addr = 16'd0; #5;
         //       if (mem_read_data !== 16'hABCD) ...
         //       test_id = test_id + 1;
+        begin: test_ram_write
+            integer i;
 
+            //Declare and initialise data
+            reg[`COL-1:0] data[`ROW_D-1:0];
+            data[0] = `COL'hA000;
+            data[1] = `COL'hB001;
+            data[2] = `COL'hC002;
+            data[3] = `COL'hD003;
+            data[4] = `COL'hE004;
+            data[5] = `COL'hF005;
+            data[6] = `COL'h1006;
+            data[7] = `COL'h0007;
+
+            //Write
+            mem_write_en = 1'b1;
+            for (i=0; i<`ROW_D; i=i+1) begin
+                mem_access_addr = {i[`COL-2:0],1'b0};
+                mem_write_data = data[i];
+                @(posedge clk); #1;
+            end
+            mem_write_en = 1'b0;
+
+            //Read
+            for (i=0; i<`ROW_D; i=i+1) begin
+                mem_read = 1'b1;
+                mem_access_addr = {i[14:0],1'b0};
+                #5;
+                if (mem_read_data!==data[i]) begin
+                    $display("FAIL [T%0d]: addr=%0d got=0x%h exp=0x%h", test_id, mem_access_addr, mem_read_data, data[i]);
+                    fail_count = fail_count+1;
+                end
+                else
+                    $display("PASS [T%0d]", test_id);
+                test_id = test_id+1;
+            end
+        end
 
         // ------------------------------------------------------------------
         // TEST GROUP 3: mem_read = 0 must produce 16'd0 output
@@ -111,7 +173,15 @@ module DataMemory_tb;
         //       else
         //           $display("PASS [T%0d]: output = 0 when mem_read=0", test_id);
         //       test_id = test_id + 1;
-
+        mem_read = 1'b0;
+        mem_access_addr = `COL'd0; #5;
+        if (mem_read_data!==`COL'd0) begin
+            $display("FAIL [T%0d]: mem_read=0 but output=%h", test_id, mem_read_data);
+            fail_count = fail_count+1;
+        end
+        else
+            $display("PASS [T%0d]: output=0 when mem_read=0", test_id);
+        test_id = test_id+1;
 
         // ------------------------------------------------------------------
         // TEST GROUP 4: Write then immediately read on the next cycle
@@ -120,7 +190,22 @@ module DataMemory_tb;
 
         // TODO: Write to address 3, then on the very next cycle read back
         //       from address 3 and confirm the new value is returned.
-
+        //Write
+        mem_write_en = 1'b1;
+        mem_access_addr = `COL'd6; //Address 6 corresponds to the 4rd word
+        mem_write_data = `COL'h69;
+        @(posedge clk); #1;
+        mem_write_en = 1'b0;
+        //Read
+        mem_read = 1'b1;
+        @(posedge clk); #1;
+        if (mem_read_data!==`COL'h69) begin
+            $display("FAIL [T%0d]: immediate read yields 0b%b", test_id, mem_read_data);
+            fail_count = fail_count+1;
+        end
+        else
+            $display("PASS [T%0d]: immediate read successful", test_id);
+        test_id = test_id+1;
 
         // ------------------------------------------------------------------
         // TEST GROUP 5: Disabled write must not alter memory
@@ -129,6 +214,15 @@ module DataMemory_tb;
 
         // TODO: Assert mem_write_en=0, clock one cycle, then read and confirm
         //       the previous value is unchanged.
+        mem_write_en = 1'b0;
+        @(posedge clk);
+        if (mem_read_data!==`COL'h69) begin
+            $display("FAIL [T%0d]: immediate read value changed to 0b%b", test_id, mem_read_data);
+            fail_count = fail_count+1;
+        end
+        else
+            $display("PASS [T%0d]: immediate read value unchanged", test_id);
+        test_id = test_id+1;
 
 
         $display("");
