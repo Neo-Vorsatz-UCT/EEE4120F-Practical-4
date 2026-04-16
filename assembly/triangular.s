@@ -1,0 +1,12 @@
+LD R7, 0(R0)
+LD R6, 2(R0)
+
+ADD R2, R2, R7
+ADD R3, R3, R2
+
+SHL R4, R2, R7
+ST R3, -2(R4)
+
+BNE R2, R6, -5
+
+BEQ R0, R0, -1
