@@ -37,11 +37,16 @@ def assemble(line):
             return op + to_bin(rs1, 3) + "000" + to_bin(ws, 3) + "000"
 
         # I-type: [OP][RS1][WS][Offset] 
-        elif instr in ['LD', 'ST', 'BEQ', 'BNE']:
+        elif instr in ['LD', 'ST']:
             # Handle both "LD R1, 4(R2)" and "BEQ R1, R2, 4"
-            r_first, r_second, imm = [int(x[1:]) if x.startswith('R') else int(x) for x in line[1:4]]
+            ws, offset, rs1 = [int(x[1:]) if x.startswith('R') else int(x) for x in line[1:4]]
             # Section 3.1: WS is encoded in [8:6] for I-type [cite: 105]
-            return op + to_bin(r_second, 3) + to_bin(r_first, 3) + to_bin(imm, 6)
+            return op + to_bin(rs1, 3) + to_bin(ws, 3) + to_bin(offset, 6)
+        elif instr in ['BEQ', 'BNE']:
+            # Handle both "LD R1, 4(R2)" and "BEQ R1, R2, 4"
+            rs1, rs2, offset = [int(x[1:]) if x.startswith('R') else int(x) for x in line[1:4]]
+            # Section 3.1: WS is encoded in [8:6] for I-type [cite: 105]
+            return op + to_bin(rs1, 3) + to_bin(rs2, 3) + to_bin(offset, 6)
 
         # J-type: [OP][Offset] 
         elif instr == 'JMP':
