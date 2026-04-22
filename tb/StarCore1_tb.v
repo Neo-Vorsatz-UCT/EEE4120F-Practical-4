@@ -64,7 +64,7 @@ module StarCore1_tb;
     // Waveform dump — captures ALL signals in the design hierarchy
     // -------------------------------------------------------------------------
     initial begin
-        $dumpfile("../waves/star.vcd");
+        $dumpfile("./waves/star.vcd");
         $dumpvars(0, StarCore1_tb);
     end
 
@@ -102,23 +102,18 @@ module StarCore1_tb;
     // processor state. It is your primary debugging tool.
     // -------------------------------------------------------------------------
     always @(posedge clk) begin
-        $display("%0t ns | PC=0x%h | instr=%b | R0=%3d R1=%3d R2=%3d R3=%3d | alu=%0d z=%b",
+        $display("%0t ns | PC=0x%h | instr=%b | R2=%3d R3=%3d R4=%3d R5=%3d | alu=%0d z=%b",
             $time,
             uut.DU.pc_current,
             uut.DU.instr,
-            uut.DU.reg_file.reg_array[0],
-            uut.DU.reg_file.reg_array[1],
             uut.DU.reg_file.reg_array[2],
             uut.DU.reg_file.reg_array[3],
+            uut.DU.reg_file.reg_array[4],
+            uut.DU.reg_file.reg_array[5],
             uut.DU.alu_result,
             uut.DU.zero_flag
         );
     end
-    // PLACEHOLDER — prints time only until you uncomment the full trace above.
-    // always @(posedge clk) begin
-    //     $display("%0t ns | clock tick (uncomment trace block when Datapath is implemented)",
-    //              $time);
-    // end
 
     // =========================================================================
     // MAIN STIMULUS BLOCK
@@ -138,60 +133,79 @@ module StarCore1_tb;
 
         // -----------------------------------------------------------------------
         // POST-SIMULATION VERIFICATION
-        //
-        // TODO: After implementing Datapath.v and StarCore1.v, uncomment the
-        //       check16() calls below and fill in the expected values for your
-        //       specific test program.
-        //
-        //       All hierarchical references below (uut.DU.*, uut.DU.reg_file.*,
-        //       uut.DU.dm.*) are commented out because they reference signals
-        //       that do not exist until the Datapath is implemented.
-        //       Uncomment them one section at a time as you complete each task.
         // -----------------------------------------------------------------------
 
         $display("");
         $display("--- Post-Simulation Verification (implement Datapath first) ---");
 
         // -----------------------------------------------------------------------
-        // STEP 1: Verify register values after execution.
-        // Uncomment and fill in expected values after implementing Datapath.v.
+        // Verify register values after execution.
         // -----------------------------------------------------------------------
-        $display("Checking R0 after LD (expect Mem[0] = 0x0001):");
-        check16(uut.DU.reg_file.reg_array[0], 16'h0001, test_id);
+
+        // R0 and R1 are not used by the program, and must remain zero.
+        $display("Checking R0 and R1 - unused (expect 0x0000):");
+        check16(uut.DU.reg_file.reg_array[0], 16'h0000, test_id); test_id = test_id + 1;
+        check16(uut.DU.reg_file.reg_array[1], 16'h0000, test_id); test_id = test_id + 1;
+
+        // Register R2 should have been set to the final base-1 loop index (8).
+        $display("Checking R2 after ADDs with 1 (expect R2+=1 (x8) = 0x0008):");
+        check16(uut.DU.reg_file.reg_array[2], 16'h0008, test_id);
         test_id = test_id + 1;
 
-        $display("Checking R1 after LD (expect Mem[1] = 0x0002):");
-        check16(uut.DU.reg_file.reg_array[1], 16'h0002, test_id);
+        // Register R4 should have been set to the final triangular number (8th: 36).
+        $display("Checking R3 after ADDs (expect 8th triangular number: 36):");
+        check16(uut.DU.reg_file.reg_array[3], 16'd36, test_id);
         test_id = test_id + 1;
 
-        $display("Checking R2 after ADD R0+R1 (expect 0x0001+0x0002 = 0x0003):");
-        check16(uut.DU.reg_file.reg_array[2], 16'h0003, test_id);
+        // Register R4 should have been set to the final loop count (8) multiplied by two by the SHL instruction.
+        $display("Checking R4 after SHR (expect final SHR outputs 0x0010):");
+        check16(uut.DU.reg_file.reg_array[4], 16'h0010, test_id);
+        test_id = test_id + 1;
+
+        // Register R5 should have been reset to zero by the final SLT instruction.
+        $display("Checking R5 after SLT (expect final SLT outputs 0x0000):");
+        check16(uut.DU.reg_file.reg_array[5], 16'h0000, test_id);
+        test_id = test_id + 1;
+
+        // Register R6 should still be holding the number of triangular numbers, 8.
+        $display("Checking R6 after LD (expect Mem[1] = 0x0008):");
+        check16(uut.DU.reg_file.reg_array[6], 16'h0008, test_id);
+        test_id = test_id + 1;
+
+        // Register R7 should still be holding the number 1.
+        $display("Checking R6 after LD (expect Mem[0] = 0x0001):");
+        check16(uut.DU.reg_file.reg_array[7], 16'h0001, test_id);
         test_id = test_id + 1;
 
         // -----------------------------------------------------------------------
-        // STEP 2: Verify data memory after ST instruction.
-        // The example program stores R2 to Mem[R1+0] = Mem[2] (address offset 0).
-        // Uncomment after implementing Datapath.v.
+        // Verify program counter is spinning in the JMP loop.
+        //    JMP is the 9th instruction. Each instruction is 2 bytes.
+        //    The first instruction is at 0, so the 9th is at 16.
+        //    Thus pc_current = 16
         // -----------------------------------------------------------------------
-        $display("Checking DataMem[2] after ST R2 -> Mem[R1+0]:");
-        check16(uut.DU.dm.memory[2], 16'h0003, test_id);
+        $display("Checking PC in loop (expect PC = 0x0010):");
+        check16(uut.DU.pc_current, 16'd16, test_id);
         test_id = test_id + 1;
 
-        // -----------------------------------------------------------------------
-        // STEP 3: Verify additional R-type instruction results.
-        // After SUB R2,R0,R1: R2 = 0x0001 - 0x0002 = 0xFFFF (wrap-around)
-        // NOTE: SUB happens AFTER ST in the example program so R2 changes.
-        // Adjust expected values to match the state at end of SIM_TIME.
-        // -----------------------------------------------------------------------
-        $display("Add your R-type verification checks here...");
-
-        // TODO
 
         // -----------------------------------------------------------------------
-        // STEP 4: Add your own checks for AND, OR, SLT, branch, jump effects.
+        // Verify data memory.
+        // Contents should be the 1st, 2nd, 3rd, ..., 8th triangular numbers.
+        //
+        // This provides that the SLT and BEQ instructions controlling the loop are working
+        // correctly too. The loop run until the last triangular number was written,
+        // and then the SLT set the loop condition to false, and BEQ didn't branch.
+        // As a result, the loop stopped, preventing earlier results from being clobbered.
         // -----------------------------------------------------------------------
-
-        // TODO
+        $display("Checking DataMem after writing all triangular numbers with ST.");
+        check16(uut.DU.dm.memory[0], 16'd1, test_id); test_id = test_id + 1;
+        check16(uut.DU.dm.memory[1], 16'd3, test_id); test_id = test_id + 1;
+        check16(uut.DU.dm.memory[2], 16'd6, test_id); test_id = test_id + 1;
+        check16(uut.DU.dm.memory[3], 16'd10, test_id); test_id = test_id + 1;
+        check16(uut.DU.dm.memory[4], 16'd15, test_id); test_id = test_id + 1;
+        check16(uut.DU.dm.memory[5], 16'd21, test_id); test_id = test_id + 1;
+        check16(uut.DU.dm.memory[6], 16'd28, test_id); test_id = test_id + 1;
+        check16(uut.DU.dm.memory[7], 16'd36, test_id); test_id = test_id + 1;
 
         // -----------------------------------------------------------------------
         // Print register and memory state (safe to uncomment after Task 7)

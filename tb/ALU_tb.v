@@ -43,7 +43,7 @@ module ALU_tb;
     // Waveform dump — always include this block
     // -------------------------------------------------------------------------
     initial begin
-        $dumpfile("../waves/alu_tb.vcd");
+        $dumpfile("./waves/alu_tb.vcd");
         $dumpvars(0, ALU_tb);
     end
 
@@ -122,12 +122,12 @@ module ALU_tb;
             va[i]=0123;    vb[i]=-0123;  vresult[i]=0;  vzero[i]=1; i=i+1;
 
             // Overflow conditions.
-            va[i]='ha000;  vb[i]='h6000+1; vresult[i]=1;      vzero[i]=0; i=i+1;
-            va[i]='hffff;  vb[i]='hffff;   vresult[i]='hfffe; vzero[i]=0; i=i+1;
-            va[i]='hffff;  vb[i]=1;        vresult[i]=0;      vzero[i]=1; i=i+1;
+            va[i]=16'ha000;  vb[i]=16'h6000+1; vresult[i]=1;      vzero[i]=0; i=i+1;
+            va[i]=16'hffff;  vb[i]=16'hffff;   vresult[i]=16'hfffe; vzero[i]=0; i=i+1;
+            va[i]=16'hffff;  vb[i]=1;        vresult[i]=0;      vzero[i]=1; i=i+1;
 
             // Zeros.
-            va[i]='h0000; vb[i]='h0000; vresult[i]=0;   vzero[i]=1; i=i+1;
+            va[i]=16'h0000; vb[i]=16'h0000; vresult[i]=0;   vzero[i]=1; i=i+1;
 
             alu_control = 3'b000;
             for (i = 0; i < N; i = i + 1) begin
@@ -169,12 +169,12 @@ module ALU_tb;
             va[i]=0123;    vb[i]=-0123;  vresult[i]=0246; vzero[i]=0; i=i+1;
 
             // Overflow
-            va[i]='ha000;  vb[i]=-('h6000+1); vresult[i]=1; vzero[i]=0; i=i+1;
+            va[i]=16'ha000;  vb[i]=-('h6000+1); vresult[i]=1; vzero[i]=0; i=i+1;
 
             // Cancellation of identical inputs.
-            va[i]='h0000; vb[i]='h0000; vresult[i]=0;   vzero[i]=1; i=i+1;
-            va[i]='h1234; vb[i]='h1234; vresult[i]=0;   vzero[i]=1; i=i+1;
-            va[i]='hffff; vb[i]='hffff; vresult[i]=0;   vzero[i]=1; i=i+1;
+            va[i]=16'h0000; vb[i]=16'h0000; vresult[i]=0;   vzero[i]=1; i=i+1;
+            va[i]=16'h1234; vb[i]=16'h1234; vresult[i]=0;   vzero[i]=1; i=i+1;
+            va[i]=16'hffff; vb[i]=16'hffff; vresult[i]=0;   vzero[i]=1; i=i+1;
 
             alu_control = 3'b001;
             for (i = 0; i < N; i = i + 1) begin
@@ -195,13 +195,13 @@ module ALU_tb;
 
             integer i, va[0:N-1], vb[0:N-1], vresult[0:N-1], vzero[0:N-1]; i=0;
             // All zeros, and check that b is ignored.
-            va[i]='h0000; vb[i]='h0000; vresult[i]='hffff; vzero[i]=0; i=i+1;
-            va[i]='h0000; vb[i]='hb3b3; vresult[i]='hffff; vzero[i]=0; i=i+1;
+            va[i]=16'h0000; vb[i]=16'h0000; vresult[i]=16'hffff; vzero[i]=0; i=i+1;
+            va[i]=16'h0000; vb[i]=16'hb3b3; vresult[i]=16'hffff; vzero[i]=0; i=i+1;
             // All ones. And check that b is ignored.
-            va[i]='hffff; vb[i]='h0000; vresult[i]='h0000; vzero[i]=1; i=i+1;
-            va[i]='hffff; vb[i]='hb3b3; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]=16'hffff; vb[i]=16'h0000; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
+            va[i]=16'hffff; vb[i]=16'hb3b3; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
             // Some on, some off.
-            va[i]='h37ae; vb[i]='hffff; vresult[i]='hc851; vzero[i]=0; i=i+1;
+            va[i]=16'h37ae; vb[i]=16'hffff; vresult[i]=16'hc851; vzero[i]=0; i=i+1;
 
             alu_control = 3'b010;
             for (i = 0; i < N; i = i + 1) begin
@@ -222,25 +222,25 @@ module ALU_tb;
 
             integer i, va[0:N-1], vb[0:N-1], vresult[0:N-1], vzero[0:N-1]; i=0;
             // Test zero with various shifts.
-            va[i]='h0000; vb[i]='h0000; vresult[i]='h0000; vzero[i]=1; i=i+1;
-            va[i]='h0000; vb[i]='h0001; vresult[i]='h0000; vzero[i]=1; i=i+1;
-            va[i]='h0000; vb[i]='h0003; vresult[i]='h0000; vzero[i]=1; i=i+1;
-            va[i]='h0000; vb[i]='hffff; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h0000; vb[i]=16'h0000; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h0000; vb[i]=16'h0001; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h0000; vb[i]=16'h0003; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h0000; vb[i]=16'hffff; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
             // Test 1 with various shifts.
-            va[i]='h0001; vb[i]='h0000; vresult[i]='h0001; vzero[i]=0; i=i+1;
-            va[i]='h0001; vb[i]='h0001; vresult[i]='h0002; vzero[i]=0; i=i+1;
-            va[i]='h0001; vb[i]='h0003; vresult[i]='h0008; vzero[i]=0; i=i+1;
-            va[i]='h0001; vb[i]='hffff; vresult[i]='h8000; vzero[i]=0; i=i+1;
+            va[i]=16'h0001; vb[i]=16'h0000; vresult[i]=16'h0001; vzero[i]=0; i=i+1;
+            va[i]=16'h0001; vb[i]=16'h0001; vresult[i]=16'h0002; vzero[i]=0; i=i+1;
+            va[i]=16'h0001; vb[i]=16'h0003; vresult[i]=16'h0008; vzero[i]=0; i=i+1;
+            va[i]=16'h0001; vb[i]=16'hffff; vresult[i]=16'h8000; vzero[i]=0; i=i+1;
             // Test last bit with various shifts.
-            va[i]='h8000; vb[i]='h0000; vresult[i]='h8000; vzero[i]=0; i=i+1;
-            va[i]='h8000; vb[i]='h0001; vresult[i]='h0000; vzero[i]=1; i=i+1;
-            va[i]='h8000; vb[i]='hffff; vresult[i]='h0000; vzero[i]=1; i=i+1;
-            va[i]='h8000; vb[i]='h0010; vresult[i]='h8000; vzero[i]=0; i=i+1;
+            va[i]=16'h8000; vb[i]=16'h0000; vresult[i]=16'h8000; vzero[i]=0; i=i+1;
+            va[i]=16'h8000; vb[i]=16'h0001; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h8000; vb[i]=16'hffff; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h8000; vb[i]=16'h0010; vresult[i]=16'h8000; vzero[i]=0; i=i+1;
             // Test 0xFFFF with various shifts.
-            va[i]='hffff; vb[i]='h0000; vresult[i]='hffff; vzero[i]=0; i=i+1;
-            va[i]='hffff; vb[i]='h0001; vresult[i]='hfffe; vzero[i]=0; i=i+1;
-            va[i]='hffff; vb[i]='h0003; vresult[i]='hfff8; vzero[i]=0; i=i+1;
-            va[i]='hffff; vb[i]='hffff; vresult[i]='h8000; vzero[i]=0; i=i+1;
+            va[i]=16'hffff; vb[i]=16'h0000; vresult[i]=16'hffff; vzero[i]=0; i=i+1;
+            va[i]=16'hffff; vb[i]=16'h0001; vresult[i]=16'hfffe; vzero[i]=0; i=i+1;
+            va[i]=16'hffff; vb[i]=16'h0003; vresult[i]=16'hfff8; vzero[i]=0; i=i+1;
+            va[i]=16'hffff; vb[i]=16'hffff; vresult[i]=16'h8000; vzero[i]=0; i=i+1;
 
             alu_control = 3'b011;
             for (i = 0; i < N; i = i + 1) begin
@@ -261,25 +261,25 @@ module ALU_tb;
 
             integer i, va[0:N-1], vb[0:N-1], vresult[0:N-1], vzero[0:N-1]; i=0;
             // Test zero with various shifts.
-            va[i]='h0000; vb[i]='h0000; vresult[i]='h0000; vzero[i]=1; i=i+1;
-            va[i]='h0000; vb[i]='h0001; vresult[i]='h0000; vzero[i]=1; i=i+1;
-            va[i]='h0000; vb[i]='h0003; vresult[i]='h0000; vzero[i]=1; i=i+1;
-            va[i]='h0000; vb[i]='hffff; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h0000; vb[i]=16'h0000; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h0000; vb[i]=16'h0001; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h0000; vb[i]=16'h0003; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h0000; vb[i]=16'hffff; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
             // Test final bit with various shifts.
-            va[i]='h8000; vb[i]='h0000; vresult[i]='h8000; vzero[i]=0; i=i+1;
-            va[i]='h8000; vb[i]='h0001; vresult[i]='h4000; vzero[i]=0; i=i+1;
-            va[i]='h8000; vb[i]='h0003; vresult[i]='h1000; vzero[i]=0; i=i+1;
-            va[i]='h8000; vb[i]='hffff; vresult[i]='h0001; vzero[i]=0; i=i+1;
+            va[i]=16'h8000; vb[i]=16'h0000; vresult[i]=16'h8000; vzero[i]=0; i=i+1;
+            va[i]=16'h8000; vb[i]=16'h0001; vresult[i]=16'h4000; vzero[i]=0; i=i+1;
+            va[i]=16'h8000; vb[i]=16'h0003; vresult[i]=16'h1000; vzero[i]=0; i=i+1;
+            va[i]=16'h8000; vb[i]=16'hffff; vresult[i]=16'h0001; vzero[i]=0; i=i+1;
             // Test first bit with various shifts.
-            va[i]='h0001; vb[i]='h0000; vresult[i]='h0001; vzero[i]=0; i=i+1;
-            va[i]='h0001; vb[i]='h0001; vresult[i]='h0000; vzero[i]=1; i=i+1;
-            va[i]='h0001; vb[i]='hffff; vresult[i]='h0000; vzero[i]=1; i=i+1;
-            va[i]='h0001; vb[i]='h0010; vresult[i]='h0001; vzero[i]=0; i=i+1;
+            va[i]=16'h0001; vb[i]=16'h0000; vresult[i]=16'h0001; vzero[i]=0; i=i+1;
+            va[i]=16'h0001; vb[i]=16'h0001; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h0001; vb[i]=16'hffff; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h0001; vb[i]=16'h0010; vresult[i]=16'h0001; vzero[i]=0; i=i+1;
             // Test 0xFFFF with various shifts.
-            va[i]='hffff; vb[i]='h0000; vresult[i]='hffff; vzero[i]=0; i=i+1;
-            va[i]='hffff; vb[i]='h0001; vresult[i]='h7fff; vzero[i]=0; i=i+1;
-            va[i]='hffff; vb[i]='h0003; vresult[i]='h1fff; vzero[i]=0; i=i+1;
-            va[i]='hffff; vb[i]='hffff; vresult[i]='h0001; vzero[i]=0; i=i+1;
+            va[i]=16'hffff; vb[i]=16'h0000; vresult[i]=16'hffff; vzero[i]=0; i=i+1;
+            va[i]=16'hffff; vb[i]=16'h0001; vresult[i]=16'h7fff; vzero[i]=0; i=i+1;
+            va[i]=16'hffff; vb[i]=16'h0003; vresult[i]=16'h1fff; vzero[i]=0; i=i+1;
+            va[i]=16'hffff; vb[i]=16'hffff; vresult[i]=16'h0001; vzero[i]=0; i=i+1;
 
             alu_control = 3'b100;
             for (i = 0; i < N; i = i + 1) begin
@@ -299,15 +299,15 @@ module ALU_tb;
 
             integer i, va[0:N-1], vb[0:N-1], vresult[0:N-1], vzero[0:N-1]; i=0;
             // Test and with zero.
-            va[i]='h0000; vb[i]='h1234; vresult[i]='h0000; vzero[i]=1; i=i+1;
-            va[i]='habcd; vb[i]='h0000; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h0000; vb[i]=16'h1234; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
+            va[i]=16'habcd; vb[i]=16'h0000; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
             // Test and with ffff.
-            va[i]='h2468; vb[i]='hffff; vresult[i]='h2468; vzero[i]=0; i=i+1;
-            va[i]='hffff; vb[i]='h9bdf; vresult[i]='h9bdf; vzero[i]=0; i=i+1;
+            va[i]=16'h2468; vb[i]=16'hffff; vresult[i]=16'h2468; vzero[i]=0; i=i+1;
+            va[i]=16'hffff; vb[i]=16'h9bdf; vresult[i]=16'h9bdf; vzero[i]=0; i=i+1;
             // Test with a mixture of set bits.
-            va[i]='h1234; vb[i]='h0f0f; vresult[i]='h0204; vzero[i]=0; i=i+1;
+            va[i]=16'h1234; vb[i]=16'h0f0f; vresult[i]=16'h0204; vzero[i]=0; i=i+1;
             // Test with mutually exclusive bits.
-            va[i]='h55cc; vb[i]='haa33; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h55cc; vb[i]=16'haa33; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
 
             alu_control = 3'b101;
             for (i = 0; i < N; i = i + 1) begin
@@ -327,15 +327,15 @@ module ALU_tb;
 
             integer i, va[0:N-1], vb[0:N-1], vresult[0:N-1], vzero[0:N-1]; i=0;
             // Test or with zero.
-            va[i]='h0000; vb[i]='h1234; vresult[i]='h1234; vzero[i]=0; i=i+1;
-            va[i]='habcd; vb[i]='h0000; vresult[i]='habcd; vzero[i]=0; i=i+1;
+            va[i]=16'h0000; vb[i]=16'h1234; vresult[i]=16'h1234; vzero[i]=0; i=i+1;
+            va[i]=16'habcd; vb[i]=16'h0000; vresult[i]=16'habcd; vzero[i]=0; i=i+1;
             // Test or with ffff.
-            va[i]='h2468; vb[i]='hffff; vresult[i]='hffff; vzero[i]=0; i=i+1;
-            va[i]='hffff; vb[i]='h9bdf; vresult[i]='hffff; vzero[i]=0; i=i+1;
+            va[i]=16'h2468; vb[i]=16'hffff; vresult[i]=16'hffff; vzero[i]=0; i=i+1;
+            va[i]=16'hffff; vb[i]=16'h9bdf; vresult[i]=16'hffff; vzero[i]=0; i=i+1;
             // Test with a mixture of set bits.
-            va[i]='h1234; vb[i]='h0f0f; vresult[i]='h1f3f; vzero[i]=0; i=i+1;
+            va[i]=16'h1234; vb[i]=16'h0f0f; vresult[i]=16'h1f3f; vzero[i]=0; i=i+1;
             // Test with mutually exclusive bits.
-            va[i]='h55cc; vb[i]='haa33; vresult[i]='hffff; vzero[i]=0; i=i+1;
+            va[i]=16'h55cc; vb[i]=16'haa33; vresult[i]=16'hffff; vzero[i]=0; i=i+1;
 
             alu_control = 3'b110;
             for (i = 0; i < N; i = i + 1) begin
@@ -356,18 +356,18 @@ module ALU_tb;
 
             integer i, va[0:N-1], vb[0:N-1], vresult[0:N-1], vzero[0:N-1]; i=0;
             // Test equal values (false cases).
-            va[i]='h0000; vb[i]='h0000; vresult[i]='h0000; vzero[i]=1; i=i+1;
-            va[i]='h1234; vb[i]='h1234; vresult[i]='h0000; vzero[i]=1; i=i+1;
-            va[i]='hffff; vb[i]='hffff; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h0000; vb[i]=16'h0000; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h1234; vb[i]=16'h1234; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
+            va[i]=16'hffff; vb[i]=16'hffff; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
             // Test a < b (true cases).
-            va[i]='h0000; vb[i]='h0001; vresult[i]='h0001; vzero[i]=0; i=i+1;
-            va[i]='h1234; vb[i]='h5678; vresult[i]='h0001; vzero[i]=0; i=i+1;
-            va[i]='h7fff; vb[i]='h8000; vresult[i]='h0001; vzero[i]=0; i=i+1;
-            va[i]='h0000; vb[i]='hffff; vresult[i]='h0001; vzero[i]=0; i=i+1;
+            va[i]=16'h0000; vb[i]=16'h0001; vresult[i]=16'h0001; vzero[i]=0; i=i+1;
+            va[i]=16'h1234; vb[i]=16'h5678; vresult[i]=16'h0001; vzero[i]=0; i=i+1;
+            va[i]=16'h7fff; vb[i]=16'h8000; vresult[i]=16'h0001; vzero[i]=0; i=i+1;
+            va[i]=16'h0000; vb[i]=16'hffff; vresult[i]=16'h0001; vzero[i]=0; i=i+1;
             // Test a > b (false cases).
-            va[i]='h0001; vb[i]='h0000; vresult[i]='h0000; vzero[i]=1; i=i+1;
-            va[i]='h5678; vb[i]='h1234; vresult[i]='h0000; vzero[i]=1; i=i+1;
-            va[i]='hffff; vb[i]='h0000; vresult[i]='h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h0001; vb[i]=16'h0000; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
+            va[i]=16'h5678; vb[i]=16'h1234; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
+            va[i]=16'hffff; vb[i]=16'h0000; vresult[i]=16'h0000; vzero[i]=1; i=i+1;
 
             alu_control = 3'b111;
             for (i = 0; i < N; i = i + 1) begin
@@ -381,9 +381,9 @@ module ALU_tb;
 
         // $display("--- Zero flag edge cases ---");
         // Note: all zero-flag edge cases are tested above as required, including but not limited to:
-        //   Verify the zero flag is asserted for SUB where a == b.
-        //   Verify the zero flag is de-asserted for all non-zero results.
-        //   Verify the zero flag for INV of 16'hFFFF (result should be 0).
+        //   Verifying the zero flag is asserted for SUB where a == b.
+        //   Verifying the zero flag is de-asserted for all non-zero results.
+        //   Verifying the zero flag for INV of 16'hFFFF (result should be 0).
 
         // -----------------------------------------------------------------------
         // Summary

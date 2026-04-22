@@ -53,6 +53,7 @@ I-type:   [15:12] opcode | [11:9] RS1 | [8:6] WS  | [5:0] immediate (signed)
 ```
 Practical-4/
 ├── Makefile                   # Build and simulation automation
+├── assembler.py               # Custom-written assembler for StarCore-1.
 ├── src/
 │   ├── Parameter.v            # Shared compile-time constants
 │   ├── ALU.v                  # Task 1 — 16-bit ALU
@@ -74,6 +75,8 @@ Practical-4/
 ├── test/
 │   ├── test.prog              # Binary instruction memory contents (16 lines)
 │   └── test.data              # Binary data memory initial contents (8 lines)
+├── assembly/
+│   └── triangular.s           # Assembly for our test program. Computes triangular numbers.
 ├── build/                     # Compiled simulation executables (auto-created)
 └── waves/                     # VCD waveform output files (auto-created)
 ```

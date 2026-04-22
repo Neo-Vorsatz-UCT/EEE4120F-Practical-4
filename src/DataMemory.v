@@ -96,8 +96,8 @@ module DataMemory (
     //       IMPORTANT: Use non-blocking assignment (<=).
     // -------------------------------------------------------------------------
     always @(posedge clk) begin
-    if (mem_write_en)
-        memory[ram_addr] <= mem_write_data;
+        if (mem_write_en)
+            memory[ram_addr] <= mem_write_data;
     end
 
     // -------------------------------------------------------------------------

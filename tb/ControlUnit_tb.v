@@ -45,7 +45,7 @@ module ControlUnit_tb;
     );
 
     initial begin
-        $dumpfile("../waves/cu_tb.vcd");
+        $dumpfile("./waves/cu_tb.vcd");
         $dumpvars(0, ControlUnit_tb);
     end
 
